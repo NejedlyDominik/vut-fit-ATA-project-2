@@ -1,0 +1,208 @@
+\documentclass[a4paper]{article}
+\usepackage[left=20mm, total={170mm, 257mm}, top=20mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows}
+
+\newcommand{\nodeDistance}{20mm}
+
+\makeatletter
+\renewcommand\maketitle{
+{\raggedright
+\begin{center}
+{\Large \bfseries \@title}\\[2ex]
+{\@author}\\[8ex] 
+\end{center}}}
+\makeatother
+
+\title{Automatizované testování a dynamická analýza (ATA) -- 2022/2023\\[0.4ex] \large Projekt 2 -- Dynamický analyzátor}
+\author{Domink Nejedlý (xnejed09)}
+
+\begin{document}
+
+\maketitle
+
+
+
+\subsection*{Monitorovací automaty}
+
+
+
+
+\begin{figure}[h!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial, initial text={}] {$R$};
+    \node (q1) [state, right=of q0] {$R$};
+    \node (q2) [state, right= 30mm of q1] {$F$};
+
+    \path[->]
+        (q0)
+            edge [bend left] node {loading\_slot\_$S$} (q1)
+        (q1)
+            edge [bend left] node {unloading\_slot\_$S$} (q0)
+            edge node {loading\_slot\_$S$} (q2)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 1. monitorovanou vlastnost: \textit{Vozík nesmí nakládat na obsazený slot.} Automat modeluje monitorování jednoho slotu $S$.}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial above, initial text={}] {$R$};
+    \node (q1) [state, right=of q0] {$R$};
+    \node (q2) [state, left=30mm of q0] {$F$};
+
+    \path[->]
+        (q0)
+            edge [bend left] node {loading\_slot\_$S$} (q1)
+            edge node {unloading\_slot\_$S$} (q2)
+        (q1)
+            edge [bend left] node {loading\_slot\_$S$} (q0)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 2. monitorovanou vlastnost: \textit{Vozík nesmí vykládat z volného slotu.} Automat modeluje monitorování jednoho slotu $S$.}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial, initial text={}] {$R$};
+    \node (q1) [state, right=45mm of q0] {$R$};
+    \node (q2) [state, right=25mm of q1] {$R$};
+    \node (q3) [state, right=30mm of q2] {$F$};
+
+    \path[->]
+        (q0)
+            edge node {requesting\_to\_$DST$(content)} (q1)
+        (q1)
+            edge node {loading(content)} (q2)
+        (q2)
+            edge [bend left] node {unloading\_at\_$DST$(content)} (q0)
+            edge node {moving\_from\_$DST$} (q3)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 3. monitorovanou vlastnost: \textit{Náklad se musí vyložit, pokud je vozík v~cílové stanici daného nákladu.} Automat modeluje monitorování jedné stanice $\mathit{DST}$.}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial above, initial text={}] {$R$};
+    \node (q1) [state, right=50mm of q0] {$R$};
+    \node (q2) [state, left=40mm of q0] {$F$};
+
+    \path[->]
+        (q0)
+            edge [bend left] node {requesting\_from\_$SRC$(content)} (q1)
+            edge node {loading\_at\_$SRC$(content)} (q2)
+        (q1)
+            edge [bend left] node {loading\_at\_$SRC$(content)} (q0)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 5. monitorovanou vlastnost: \textit{Vozík nesmí nakládat ve stanici, pokud na to neexistovala žádost.} Automat modeluje monitorování jedné stanice $\mathit{SRC}$.}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial, initial text={}] {$R$};
+    \node (q1) [state, right=of q0] {$R$};
+    \node (q2) [state, right=of q1] {$R$};
+    \node (q3) [state, right=of q2] {$R$};
+    \node (q4) [state, right=of q3] {$R$};
+    \node (q5) [state, right=of q4] {$F$};
+
+    \path[->]
+        (q0) 
+            edge [bend left] node {loading} (q1)
+        (q1)
+            edge [bend left] node {unloading} (q0)
+            edge [bend left] node {loading} (q2)
+        (q2)
+            edge [bend left] node {unloading} (q1)
+            edge [bend left] node {loading} (q3)
+        (q3)
+            edge [bend left] node {unloading} (q2)
+            edge [bend left] node {loading} (q4)
+        (q4)
+            edge [bend left] node {unloading} (q3)
+            edge node {loading} (q5)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 6. monitorovanou vlastnost: \textit{Nesmí být naloženo více než 4 náklady.}}
+\end{figure}
+
+
+
+
+\newpage
+
+
+
+
+\begin{figure}[t!]
+    \centering
+            
+    \begin{tikzpicture}[node distance=\nodeDistance, auto]
+
+    \node (q0) [state, initial, initial text={$[\text{current\_loaded\_weight} \coloneqq 0]$}] {$R$};
+    \node (q1) [state, right=90mm of q0] {$F$};
+
+    \path[->]
+        (q0)
+            edge [loop above] node [align=center] {$\text{loading(weight)} \land \text{current\_loaded\_weight} + \text{weight} \le 150$\\$[\text{current\_loaded\_weight} \coloneqq \text{current\_loaded\_weight} + \text{weight}]$} ()
+            edge [loop below] node [align=center] {unloading(weight)\\$[\text{current\_loaded\_weight} \coloneqq \text{current\_loaded\_weight} - \text{weight}]$} ()
+            edge node {$\text{loading(weight)} \land \text{current\_loaded\_weight} + \text{weight} > 150$} (q1)
+    ;
+        
+    \end{tikzpicture}
+    \caption{Monitorovací automat pro 7. monitorovanou vlastnost: \textit{Vozík nesmí být přetížen.} V hranatých závorkách ($[]$) je pro úplnost uvedena inicializace proměnné představující aktuálně naloženou váhu na vozíku (current\_loaded\_weight) a manipulace s touto proměnnou při nakládání a vykládání nákladu.}
+    \end{figure}
+
+U většiny stavů v automatech na obrázcích by mohly být doplněny ještě vlastní smyčky, které by platily vždy, pokud by nebyla splněna některá z vystupujících hran daného stavu (znázorňovaly by explicitně setrvání v daném stavu). Tyto smyčky však zejména z důvodu zachování přehlednosti automatů na obrázcích uvedeny nejsou.\newline
+\textit{Poznámka: Monitory volitelných vlastností byly implementovány bez tvorby monitorovacích automatů.}
+
+
+
+
+\subsection*{Report chyb}
+
+Přiložený soubor \verb|requests.csv| odhaluje porušení 4. monitorované vlastnosti: \textit{Každý požadavek o přesun musí někdy způsobit nakládku.}\newline
+\textit{Poznámka: Pokud vstupní log obsahuje více požadavků na naložení zcela identického nákladu (stejný název i~váha) ze stejné stanice, přičemž nějakou dobu tyto požadavky existují současně a alespoň jeden z nich je následně naložen, je tomuto naloženému materiálu v monitoru přiřazena špatná cílová stanice. To je způsobeno tím, že řadič vozíku jistým způsobem řadí požadavky do jiného pořadí než ve kterém přicházely. Jelikož pak při nakládání není přímo známa cílová stanice a je dohledávána na základě zdrojové stanice, obsahu a váhy ve vystavených požadavcích, nelze na základě těchto informací jednoznačně určit, ke kterému požadavku se daná nakládka vztahuje, pokud jsou ony dostupné informace zcela totožné. Možným řešením tohoto problému by pak mohlo být řazení a vybírání/odstraňování uchovávaných požadavků v monitoru stejným způsobem, jakým to provádí řadič vozíku. Monitor by pak byl ale přímo závislý na aktuální implementaci chování řadiče vozíku, které však není přesně dáno specifikací.}
+
+
+
+
+\end{document}
